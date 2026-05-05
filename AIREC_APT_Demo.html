@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIREC-APT Framework — Demo Sistem</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --bg4: #1f2d45;
+    --border: rgba(99,149,255,0.15);
+    --border2: rgba(99,149,255,0.3);
+    --text: #e8edf7;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --green: #10b981;
+    --green2: #34d399;
+    --amber: #f59e0b;
+    --amber2: #fbbf24;
+    --red: #ef4444;
+    --red2: #f87171;
+    --purple: #8b5cf6;
+    --purple2: #a78bfa;
+    --cyan: #06b6d4;
+    --cyan2: #22d3ee;
+    --font: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCANLINE bg effect ── */
+  body::before {
+    content:'';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .shell { display: flex; height: 100vh; position: relative; z-index: 1; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .logo-text { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent2); }
+  .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 0.3px; }
+
+  .nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+  .nav-section { margin-bottom: 16px; }
+  .nav-label { font-size: 9px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; padding: 0 8px 6px; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 12.5px; color: var(--text2);
+    transition: all 0.15s; margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+  .nav-item.active { background: rgba(59,130,246,0.15); color: var(--accent2); border-color: rgba(59,130,246,0.3); }
+  .nav-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items:center; justify-content:center; font-size: 11px; flex-shrink: 0; }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-left: auto; }
+
+  .sidebar-status {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text3);
+  }
+  .status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── MAIN ── */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+    flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .page-title { font-size: 15px; font-weight: 600; }
+  .page-sub { font-size: 11px; color: var(--text3); }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; padding: 4px 10px; border-radius: 20px;
+    font-weight: 600; letter-spacing: 0.3px;
+  }
+  .badge-green { background: rgba(16,185,129,0.12); color: var(--green2); border: 1px solid rgba(16,185,129,0.25); }
+  .badge-red { background: rgba(239,68,68,0.12); color: var(--red2); border: 1px solid rgba(239,68,68,0.25); }
+  .badge-amber { background: rgba(245,158,11,0.12); color: var(--amber2); border: 1px solid rgba(245,158,11,0.25); }
+  .badge-blue { background: rgba(59,130,246,0.12); color: var(--accent2); border: 1px solid rgba(59,130,246,0.25); }
+  .badge-purple { background: rgba(139,92,246,0.12); color: var(--purple2); border: 1px solid rgba(139,92,246,0.25); }
+
+  .btn {
+    font-family: var(--font); font-size: 12px; font-weight: 500;
+    padding: 7px 14px; border-radius: 7px; cursor: pointer;
+    transition: all 0.15s; border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-ghost { background: transparent; color: var(--text2); border-color: var(--border2); }
+  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+  .btn-danger { background: rgba(239,68,68,0.15); color: var(--red2); border-color: rgba(239,68,68,0.3); }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+  /* ── CONTENT ── */
+  .content { padding: 20px 24px; flex: 1; }
+
+  /* ── SECTION PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .kpi-card.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+  .kpi-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
+  .kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+  .kpi-card.cyan::before { background: linear-gradient(90deg, var(--cyan), transparent); }
+  .kpi-label { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 2px; }
+  .kpi-trend { font-size: 10px; color: var(--text3); }
+  .kpi-trend .up { color: var(--green2); }
+  .kpi-trend .down { color: var(--red2); }
+
+  /* ── TWO-COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .card-body { padding: 16px; }
+
+  /* ── SPECTRUM CHART ── */
+  #specCanvas { width: 100%; height: 160px; display: block; }
+
+  /* ── ALERT TABLE ── */
+  .table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .table th { text-align: left; padding: 8px 12px; font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; }
+  .table td { padding: 10px 12px; border-bottom: 1px solid rgba(99,149,255,0.07); color: var(--text2); }
+  .table tr:hover td { background: rgba(59,130,246,0.04); }
+  .table tr:last-child td { border-bottom: none; }
+  .severity-dot { display: inline-flex; align-items: center; gap: 6px; }
+  .severity-dot::before { content:''; width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .severity-dot.critical::before { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .severity-dot.high::before { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .severity-dot.medium::before { background: var(--accent); }
+  .severity-dot.low::before { background: var(--green); }
+
+  /* ── MAP PLACEHOLDER ── */
+  .map-box { position: relative; height: 220px; overflow: hidden; border-radius: 8px; background: var(--bg3); }
+  #mapCanvas { width: 100%; height: 100%; }
+  .map-overlay { position: absolute; bottom: 12px; right: 12px; background: rgba(10,14,26,0.85); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 10px; }
+  .map-legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── AI CLASSIFY ── */
+  .classify-grid { display: flex; flex-direction: column; gap: 8px; }
+  .class-row { display: flex; align-items: center; gap: 10px; }
+  .class-name { font-size: 12px; color: var(--text2); width: 130px; flex-shrink: 0; }
+  .class-bar-wrap { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+  .class-bar { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+  .class-pct { font-size: 12px; font-weight: 600; font-family: var(--mono); min-width: 36px; text-align: right; }
+
+  /* ── BLOCKCHAIN BLOCKS ── */
+  .chain-wrap { display: flex; align-items: center; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+  .block {
+    flex-shrink: 0; width: 110px; padding: 10px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    font-size: 10px;
+  }
+  .block.latest { border-color: var(--accent); background: rgba(59,130,246,0.06); }
+  .block.latest .block-num { color: var(--accent2); }
+  .block-num { font-family: var(--mono); font-weight: 700; font-size: 11px; margin-bottom: 4px; }
+  .block-hash { font-family: var(--mono); color: var(--text3); font-size: 9px; word-break: break-all; line-height: 1.4; margin-bottom: 4px; }
+  .block-tx { color: var(--text2); }
+  .chain-arrow { color: var(--accent); font-size: 16px; flex-shrink: 0; }
+
+  /* ── FEDERATED NODES ── */
+  .fed-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .fed-node {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px; text-align: center; cursor: pointer;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .fed-node:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .fed-node.syncing { border-color: rgba(59,130,246,0.5); }
+  .fed-node.syncing::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(59,130,246,0.06) 60%, transparent 80%);
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+  .fed-node-icon { font-size: 20px; margin-bottom: 4px; }
+  .fed-node-name { font-size: 10px; font-weight: 600; margin-bottom: 2px; }
+  .fed-node-sub { font-size: 9px; color: var(--text3); }
+  .fed-progress { height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 6px; }
+  .fed-progress-bar { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.5s; }
+
+  /* ── DIGITAL TWIN ── */
+  #twinCanvas { width: 100%; height: 200px; display: block; }
+
+  /* ── AHP TABLE ── */
+  .ahp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ahp-table th { text-align: left; padding: 8px 10px; font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; }
+  .ahp-table td { padding: 9px 10px; border-bottom: 1px solid rgba(99,149,255,0.07); font-size: 12px; }
+  .weight-bar { display: flex; align-items: center; gap: 8px; }
+  .weight-fill { height: 6px; border-radius: 3px; background: var(--accent); transition: width 0.5s; }
+
+  /* ── ROADMAP ── */
+  .roadmap { position: relative; }
+  .phase {
+    display: flex; gap: 16px; margin-bottom: 16px;
+    padding: 14px; border: 1px solid var(--border);
+    border-radius: 10px; background: var(--bg3);
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .phase:hover { border-color: var(--border2); }
+  .phase.active-phase { border-color: var(--accent); background: rgba(59,130,246,0.05); }
+  .phase-num {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .phase1 { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .phase2 { background: rgba(139,92,246,0.15); color: var(--purple2); }
+  .phase3 { background: rgba(16,185,129,0.15); color: var(--green2); }
+  .phase-content { flex: 1; }
+  .phase-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .phase-desc { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+  .phase-kpis { display: flex; gap: 8px; flex-wrap: wrap; }
+  .phase-kpi { font-size: 10px; background: var(--bg4); border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; color: var(--text2); }
+  .phase-progress { height: 4px; background: var(--bg4); border-radius: 2px; margin-top: 8px; }
+  .phase-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+
+  /* ── ALERT LOG ── */
+  .alert-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px; border-bottom: 1px solid rgba(99,149,255,0.07);
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-icon { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-top: 1px; }
+  .alert-icon.crit { background: rgba(239,68,68,0.15); }
+  .alert-icon.warn { background: rgba(245,158,11,0.15); }
+  .alert-icon.info { background: rgba(59,130,246,0.15); }
+  .alert-meta { font-size: 10px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+  .alert-body-text { font-size: 12px; color: var(--text); margin-bottom: 1px; }
+
+  /* ── RISK MATRIX ── */
+  .risk-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .risk-cell {
+    aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center;
+    justify-content: center; font-size: 9px; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .risk-cell:hover { transform: scale(1.05); z-index: 2; }
+  .risk-cell.r-low { background: rgba(16,185,129,0.15); color: var(--green2); border: 1px solid rgba(16,185,129,0.2); }
+  .risk-cell.r-med { background: rgba(245,158,11,0.15); color: var(--amber2); border: 1px solid rgba(245,158,11,0.2); }
+  .risk-cell.r-high { background: rgba(239,68,68,0.15); color: var(--red2); border: 1px solid rgba(239,68,68,0.25); }
+  .risk-cell.r-crit { background: rgba(239,68,68,0.3); color: var(--red2); border: 1px solid rgba(239,68,68,0.5); box-shadow: 0 0 12px rgba(239,68,68,0.2); }
+  .risk-axis { font-size: 9px; color: var(--text3); text-align: center; padding: 3px; }
+
+  /* ── TIMELINE ── */
+  .gantt-wrap { overflow-x: auto; }
+  .gantt-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; height: 28px; }
+  .gantt-label { width: 120px; font-size: 11px; color: var(--text2); flex-shrink: 0; text-align: right; padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gantt-track { flex: 1; height: 100%; background: var(--bg3); border-radius: 4px; position: relative; min-width: 400px; }
+  .gantt-bar {
+    position: absolute; height: 100%; border-radius: 4px;
+    display: flex; align-items: center; padding: 0 8px;
+    font-size: 10px; font-weight: 500; white-space: nowrap; overflow: hidden;
+    transition: opacity 0.2s;
+  }
+  .gantt-bar:hover { opacity: 0.85; }
+
+  /* ── SEARCH/FILTER ── */
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 12px; font-size: 12px;
+  }
+  .search-box input { background: transparent; border: none; outline: none; color: var(--text); font-family: var(--font); font-size: 12px; width: 200px; }
+  .search-box input::placeholder { color: var(--text3); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 24px; width: 480px; max-width: 90vw;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:none} }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-close { cursor: pointer; color: var(--text3); font-size: 18px; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .detail-item { background: var(--bg3); border-radius: 8px; padding: 10px; }
+  .detail-item-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .detail-item-value { font-size: 13px; font-weight: 500; }
+
+  .notification-toast {
+    position: fixed; top: 16px; right: 16px; z-index: 200;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 12px; animation: slideDown 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    max-width: 300px;
+  }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
+
+  .section-header { margin-bottom: 16px; }
+  .section-title { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+  .section-desc { font-size: 12px; color: var(--text3); }
+
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--bg4); color: var(--text2); border: 1px solid var(--border); margin: 2px; }
+
+  .progress-ring { font-size: 10px; color: var(--text3); }
+  .progress-ring span { color: var(--green2); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">
+        <div class="logo-icon">⚡</div>
+        <div>
+          <div class="logo-text">AIREC-APT</div>
+        </div>
+      </div>
+      <div class="logo-sub" style="padding-left:2px">Balmon SFR Kelas I Medan</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-label">Monitoring</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+          <span class="nav-icon" style="background:rgba(59,130,246,0.15)">📡</span> Dashboard
+          <span class="nav-dot" style="background:var(--green);box-shadow:0 0 5px var(--green)"></span>
+        </div>
+        <div class="nav-item" onclick="showPage('deteksi')">
+          <span class="nav-icon" style="background:rgba(239,68,68,0.15)">🔍</span> Deteksi AI
+          <span class="nav-dot" style="background:var(--red)"></span>
+        </div>
+        <div class="nav-item" onclick="showPage('peta')">
+          <span class="nav-icon" style="background:rgba(16,185,129,0.15)">🗺️</span> Peta Sinyal
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Analitik</div>
+        <div class="nav-item" onclick="showPage('federated')">
+          <span class="nav-icon" style="background:rgba(139,92,246,0.15)">🌐</span> Federated ML
+        </div>
+        <div class="nav-item" onclick="showPage('twin')">
+          <span class="nav-icon" style="background:rgba(6,182,212,0.15)">🔬</span> Digital Twin
+        </div>
+        <div class="nav-item" onclick="showPage('dss')">
+          <span class="nav-icon" style="background:rgba(245,158,11,0.15)">⚖️</span> DSS AHP-TOPSIS
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Tata Kelola</div>
+        <div class="nav-item" onclick="showPage('blockchain')">
+          <span class="nav-icon" style="background:rgba(99,149,255,0.15)">🔗</span> Blockchain Audit
+        </div>
+        <div class="nav-item" onclick="showPage('roadmap')">
+          <span class="nav-icon" style="background:rgba(16,185,129,0.15)">📋</span> Roadmap KPI
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-status">
+      <div class="status-row"><span class="pulse"></span> Sistem Aktif — Fase 1 Pilot</div>
+      <div style="font-size:10px;color:var(--text3)">CNN-LSTM v2.3 | Edge: 3 Balmon</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard Pengawasan APT</div>
+          <div class="page-sub" id="pageSub">Real-time monitoring spektrum frekuensi radio — Indonesia</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="badge badge-green">⬤ Live</div>
+        <div class="badge badge-amber" id="alertBadge">⚠ 4 Alert Aktif</div>
+        <div class="badge badge-blue">Model: CNN-LSTM 94%</div>
+        <button class="btn btn-danger" onclick="simulateDeteksi()">🚨 Simulasi Deteksi</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════════ PAGE: DASHBOARD ══════════════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card blue">
+            <div class="kpi-label">Sinyal Teranalisis</div>
+            <div class="kpi-value" id="kpi1" style="color:var(--accent2)">0</div>
+            <div class="kpi-trend"><span class="up">↑ 18%</span> dari kemarin</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">APT Terdeteksi</div>
+            <div class="kpi-value" id="kpi2" style="color:var(--red2)">0</div>
+            <div class="kpi-trend"><span class="down">↑ 3</span> minggu ini</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Akurasi Deteksi</div>
+            <div class="kpi-value" id="kpi3" style="color:var(--green2)">0%</div>
+            <div class="kpi-trend"><span class="up">↑ 2.1%</span> F1-score</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">MTTD (detik)</div>
+            <div class="kpi-value" id="kpi4" style="color:var(--amber2)">—</div>
+            <div class="kpi-trend">Target: <span>≤60 det</span></div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="kpi-label">Balmon Coverage</div>
+            <div class="kpi-value" id="kpi5" style="color:var(--purple2)">0%</div>
+            <div class="kpi-trend">Fase 1: 3 Balmon</div>
+          </div>
+          <div class="kpi-card cyan">
+            <div class="kpi-label">Auto-Decision</div>
+            <div class="kpi-value" id="kpi6" style="color:var(--cyan2)">0%</div>
+            <div class="kpi-trend">Target Fase 3: ≥70%</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Spectrum Monitor -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📊 Spektrum Monitor Real-time</div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <div class="badge badge-green">Live</div>
+                <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="toggleSpectrum()">Pause</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:12px">
+              <canvas id="specCanvas"></canvas>
+              <div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--text3)">
+                <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--green2);border-radius:2px"></span>Normal</span>
+                <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--red2);border-radius:2px"></span>Anomali APT</span>
+                <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--amber2);border-radius:2px"></span>Waspada</span>
+                <span style="color:var(--text3);margin-left:auto">Frek: 400–900 MHz</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert Log -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🚨 Log Alert Terkini</div>
+              <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="addAlert()">+ Tambah Demo</button>
+            </div>
+            <div id="alertLog" style="max-height:220px;overflow-y:auto">
+              <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Matrix + Tabel APT -->
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🎯 Matriks Risiko APT</div>
+              <span class="badge badge-red">1 Kritis</span>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;gap:16px">
+                <div>
+                  <div style="font-size:10px;color:var(--text3);margin-bottom:8px;text-align:center">Dampak →</div>
+                  <div class="risk-grid" id="riskMatrix"></div>
+                  <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Probabilitas ↑</div>
+                </div>
+                <div style="flex:1">
+                  <div id="riskDetail" style="font-size:12px;color:var(--text2)">
+                    <p style="color:var(--text3);font-size:11px">Klik sel untuk detail risiko</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📋 Tabel APT Terdeteksi</div>
+              <div class="search-box">
+                <span style="color:var(--text3)">🔍</span>
+                <input type="text" placeholder="Cari APT..." oninput="filterTable(this.value)">
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="table" id="aptTable">
+                <thead><tr>
+                  <th>Tipe APT</th><th>Frekuensi</th><th>Lokasi</th><th>Skor AI</th><th>Status</th>
+                </tr></thead>
+                <tbody id="aptTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: DETEKSI AI ══════════════ -->
+      <div class="page" id="page-deteksi">
+        <div class="section-header">
+          <div class="section-title">Mesin Deteksi CNN-LSTM</div>
+          <div class="section-desc">Spectrum Anomaly Detection Engine — Input: Spectrogram STFT 128×128 → 5-class output</div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🧠 Klasifikasi Sinyal Real-time</div>
+              <button class="btn btn-primary" onclick="runInference()">▶ Jalankan Inferensi</button>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom:16px">
+                <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Input Spectrogram STFT (128×128 px):</div>
+                <canvas id="spectroCanvas" width="256" height="128" style="width:100%;height:100px;border-radius:6px;background:var(--bg3)"></canvas>
+              </div>
+              <div class="classify-grid" id="classifyGrid">
+                <!-- filled by JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📈 Performa Model vs Baseline</div>
+            </div>
+            <div class="card-body" style="padding:12px">
+              <canvas id="perfChart" style="width:100%;height:200px;display:block"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0">
+          <div class="card-header">
+            <div class="card-title">🏗️ Arsitektur CNN-LSTM (8 Layer)</div>
+            <span class="badge badge-green">Target: 90–94% akurasi</span>
+          </div>
+          <div class="card-body">
+            <div id="archViz" style="display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: PETA ══════════════ -->
+      <div class="page" id="page-peta">
+        <div class="section-header">
+          <div class="section-title">Peta Distribusi APT — Indonesia</div>
+          <div class="section-desc">Visualisasi sebaran deteksi perangkat ilegal berbasis GPS & sensor Balmon</div>
+        </div>
+        <div class="two-col">
+          <div class="card" style="grid-column:span 2">
+            <div class="card-header">
+              <div class="card-title">🗺️ Peta Hotspot APT</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="filterMap('all')">Semua</button>
+                <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="filterMap('jammer')">Jammer</button>
+                <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="filterMap('imsi')">IMSI Catcher</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:12px">
+              <div class="map-box">
+                <canvas id="mapCanvas"></canvas>
+                <div class="map-overlay">
+                  <div class="map-legend-row"><span class="legend-dot" style="background:var(--red)"></span><span style="font-size:10px">Jammer (24)</span></div>
+                  <div class="map-legend-row"><span class="legend-dot" style="background:var(--amber)"></span><span style="font-size:10px">IMSI Catcher (8)</span></div>
+                  <div class="map-legend-row"><span class="legend-dot" style="background:var(--purple)"></span><span style="font-size:10px">SDR Modified (12)</span></div>
+                  <div class="map-legend-row"><span class="legend-dot" style="background:var(--accent)"></span><span style="font-size:10px">Repeater Ilegal (31)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="three-col" style="margin-top:16px">
+          <div class="card">
+            <div class="card-body" style="text-align:center">
+              <div class="kpi-label">Titik Hotspot</div>
+              <div style="font-size:28px;font-weight:700;color:var(--red2);margin:6px 0">75</div>
+              <div class="badge badge-red">Kritis: 12</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="text-align:center">
+              <div class="kpi-label">Provinsi Terdampak</div>
+              <div style="font-size:28px;font-weight:700;color:var(--amber2);margin:6px 0">18</div>
+              <div class="badge badge-amber">Sumut, DKI, Jatim +15</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="text-align:center">
+              <div class="kpi-label">Response Rate</div>
+              <div style="font-size:28px;font-weight:700;color:var(--green2);margin:6px 0">78%</div>
+              <div class="badge badge-green">Target: ≥85%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: FEDERATED ML ══════════════ -->
+      <div class="page" id="page-federated">
+        <div class="section-header">
+          <div class="section-title">Federated Learning — FedAvg</div>
+          <div class="section-desc">Training model kolaboratif tanpa berbagi data mentah antar Balmon (McMahan et al., 2017)</div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🌐 Node Balmon — Status Federated</div>
+              <button class="btn btn-primary" onclick="startFedRound()">▶ Round Baru</button>
+            </div>
+            <div class="card-body">
+              <div class="fed-grid" id="fedGrid"></div>
+              <div style="margin-top:14px;padding:10px;background:var(--bg3);border-radius:8px">
+                <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Global Model Aggregation Progress</div>
+                <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden">
+                  <div id="globalAgg" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:4px;transition:width 0.5s"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text3)">
+                  <span>Round <span id="fedRound">0</span> / T</span>
+                  <span id="fedAccLabel">Akurasi: —</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📉 Konvergensi Model</div>
+            </div>
+            <div class="card-body" style="padding:12px">
+              <canvas id="fedChart" style="width:100%;height:220px;display:block"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: DIGITAL TWIN ══════════════ -->
+      <div class="page" id="page-twin">
+        <div class="section-header">
+          <div class="section-title">Digital Twin — Simulasi Spektrum Virtual</div>
+          <div class="section-desc">Virtual Spectrum & Device Simulation untuk uji kebijakan sebelum deployment lapangan</div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🔬 Simulasi Skenario Interferensi</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="twinScenario('normal')">Normal</button>
+                <button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="twinScenario('jam')">Jammer ON</button>
+                <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="twinScenario('imsi')">IMSI Attack</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:12px">
+              <canvas id="twinCanvas"></canvas>
+              <div id="twinStatus" style="margin-top:8px;padding:8px 12px;background:var(--bg3);border-radius:6px;font-size:11px;color:var(--text2)">
+                Pilih skenario untuk memulai simulasi Digital Twin
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚙️ Parameter Simulasi</div>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px">
+                    <span style="color:var(--text2)">Kekuatan Sinyal (dBm)</span>
+                    <span id="sigStrLabel" style="font-family:var(--mono);color:var(--accent2)">-60</span>
+                  </div>
+                  <input type="range" min="-90" max="-10" value="-60" oninput="document.getElementById('sigStrLabel').textContent=this.value;updateTwinParams()" style="width:100%">
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px">
+                    <span style="color:var(--text2)">Frekuensi (MHz)</span>
+                    <span id="freqLabel" style="font-family:var(--mono);color:var(--accent2)">900</span>
+                  </div>
+                  <input type="range" min="400" max="2600" value="900" oninput="document.getElementById('freqLabel').textContent=this.value;updateTwinParams()" style="width:100%">
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px">
+                    <span style="color:var(--text2)">Jumlah Perangkat Ilegal</span>
+                    <span id="devCountLabel" style="font-family:var(--mono);color:var(--red2)">3</span>
+                  </div>
+                  <input type="range" min="0" max="20" value="3" oninput="document.getElementById('devCountLabel').textContent=this.value;updateTwinParams()" style="width:100%">
+                </div>
+                <div style="padding:12px;background:var(--bg3);border-radius:8px">
+                  <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Prediksi Dampak:</div>
+                  <div id="twinPrediction" style="font-size:13px;color:var(--amber2)">Hitung dengan mengubah parameter</div>
+                </div>
+                <button class="btn btn-primary" style="width:100%" onclick="runTwinSim()">▶ Jalankan Simulasi</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: DSS ══════════════ -->
+      <div class="page" id="page-dss">
+        <div class="section-header">
+          <div class="section-title">Decision Support System — AHP-TOPSIS MCDA</div>
+          <div class="section-desc">Multi-Criteria Decision Analysis untuk ranking alternatif tindakan penertiban APT (CR = 0.009 &lt; 0.10)</div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚖️ AHP Pairwise Comparison</div>
+              <span class="badge badge-green">CR = 0.009 ✓</span>
+            </div>
+            <div class="card-body">
+              <table class="ahp-table">
+                <thead><tr>
+                  <th>Kriteria</th><th>Bobot (w)</th><th>Visualisasi</th><th>λ Kontribusi</th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td style="color:var(--text)">Bahaya Interferensi</td>
+                    <td style="font-family:var(--mono);color:var(--red2);font-weight:600">0.540</td>
+                    <td><div class="weight-bar"><div class="weight-fill" style="width:54%"></div><span style="font-size:10px;color:var(--text3)">54%</span></div></td>
+                    <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">1.622</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text)">Skala Distribusi</td>
+                    <td style="font-family:var(--mono);color:var(--amber2);font-weight:600">0.297</td>
+                    <td><div class="weight-bar"><div class="weight-fill" style="width:29.7%;background:var(--amber)"></div><span style="font-size:10px;color:var(--text3)">30%</span></div></td>
+                    <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">0.892</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text)">Urgensi Hukum</td>
+                    <td style="font-family:var(--mono);color:var(--green2);font-weight:600">0.163</td>
+                    <td><div class="weight-bar"><div class="weight-fill" style="width:16.3%;background:var(--green)"></div><span style="font-size:10px;color:var(--text3)">16%</span></div></td>
+                    <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">0.490</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text3)">
+                λ<sub>max</sub> = 3.009 &nbsp;·&nbsp; CI = 0.005 &nbsp;·&nbsp; <strong style="color:var(--green2)">CR = 0.009 &lt; 0.10 — Konsisten ✓</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🏆 TOPSIS Ranking Tindakan</div>
+              <button class="btn btn-primary" onclick="recalcTOPSIS()">↻ Hitung Ulang</button>
+            </div>
+            <div class="card-body">
+              <div id="topsisResult"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0">
+          <div class="card-header">
+            <div class="card-title">📊 Regulatory Gap Analysis (~95% Gap Total)</div>
+          </div>
+          <div class="card-body">
+            <div id="gapAnalysis" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: BLOCKCHAIN ══════════════ -->
+      <div class="page" id="page-blockchain">
+        <div class="section-header">
+          <div class="section-title">Blockchain Regulatory Ledger — Proof of Authority</div>
+          <div class="section-desc">Immutable audit trail setiap aktivitas pengawasan — SHA-256 hash, tidak dapat dimanipulasi</div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title">🔗 Chain of Custody APT</div>
+            <button class="btn btn-primary" onclick="addBlock()">+ Tambah Block</button>
+          </div>
+          <div class="card-body" style="padding:12px">
+            <div class="chain-wrap" id="chainWrap"></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🔐 Verifikasi Hash</div>
+            </div>
+            <div class="card-body">
+              <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Masukkan Block ID untuk verifikasi integritas:</div>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <input id="verifyInput" type="text" placeholder="Block #0042..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none">
+                <button class="btn btn-primary" onclick="verifyBlock()">Verifikasi</button>
+              </div>
+              <div id="verifyResult" style="padding:12px;background:var(--bg3);border-radius:8px;font-size:12px;font-family:var(--mono);color:var(--text3)">
+                Hasil verifikasi tampil di sini
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📊 Statistik Ledger</div>
+            </div>
+            <div class="card-body">
+              <div class="three-col" style="gap:8px;margin-bottom:0">
+                <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Total Block</div>
+                  <div id="blockCount" style="font-size:22px;font-weight:700;color:var(--accent2);margin:4px 0">5</div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Transaksi</div>
+                  <div id="txCount" style="font-size:22px;font-weight:700;color:var(--green2);margin:4px 0">24</div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:10px;text-align:center">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Validators</div>
+                  <div style="font-size:22px;font-weight:700;color:var(--purple2);margin:4px 0">3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: ROADMAP ══════════════ -->
+      <div class="page" id="page-roadmap">
+        <div class="section-header">
+          <div class="section-title">Roadmap Implementasi 48 Bulan — KPI</div>
+          <div class="section-desc">Tiga fase: Pilot (Medan, Palangkaraya, Pekanbaru) → Scaled → Nasional 34 Balmon</div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📋 Timeline Implementasi</div>
+            </div>
+            <div class="card-body">
+              <div class="roadmap" id="roadmapCards"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📊 Gantt Chart</div>
+            </div>
+            <div class="card-body" style="padding:12px">
+              <div class="gantt-wrap" id="ganttChart"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header">
+            <div class="card-title">💰 Estimasi Biaya Implementasi (Rp Juta)</div>
+          </div>
+          <div class="card-body" style="padding:12px">
+            <canvas id="budgetChart" style="width:100%;height:160px;display:block"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitle">Detail APT</span>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+const pageTitles = {
+  dashboard: ['Dashboard Pengawasan APT','Real-time monitoring spektrum frekuensi radio — Indonesia'],
+  deteksi: ['Mesin Deteksi CNN-LSTM','Klasifikasi 5-kelas: Normal, Jammer, Repeater Ilegal, IMSI Catcher, SDR Modified'],
+  peta: ['Peta Distribusi APT','Visualisasi sebaran hotspot perangkat ilegal seluruh Indonesia'],
+  federated: ['Federated Learning — FedAvg','Training model AI terdistribusi tanpa berbagi data mentah'],
+  twin: ['Digital Twin Spektrum','Simulasi virtual lingkungan spektrum & uji skenario kebijakan'],
+  dss: ['DSS AHP-TOPSIS','Multi-Criteria Decision Analysis — rekomendasi tindakan penertiban'],
+  blockchain: ['Blockchain Regulatory Ledger','Immutable audit trail setiap aktivitas pengawasan APT'],
+  roadmap: ['Roadmap Implementasi 48 Bulan','KPI per fase: Pilot → Scaled → Nasional']
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(n => { if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(id)) n.classList.add('active'); });
+  const [title, sub] = pageTitles[id] || ['',''];
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageSub').textContent = sub;
+  // Init page-specific components
+  if (id === 'deteksi') initDeteksiPage();
+  if (id === 'federated') initFederatedPage();
+  if (id === 'twin') initTwinPage();
+  if (id === 'dss') initDSSPage();
+  if (id === 'blockchain') initBlockchainPage();
+  if (id === 'roadmap') initRoadmapPage();
+  if (id === 'peta') initMapPage();
+}
+
+// ══════════════════════════════════════
+//  INIT DASHBOARD
+// ══════════════════════════════════════
+const aptData = [
+  {type:'Jammer GSM',freq:'900 MHz',loc:'Medan, Sumut',score:0.96,status:'Kritis',typeKey:'jammer'},
+  {type:'IMSI Catcher',freq:'850 MHz',loc:'Jakarta Pusat',score:0.89,status:'Tinggi',typeKey:'imsi'},
+  {type:'SDR Modified',freq:'2.4 GHz',loc:'Surabaya',score:0.81,status:'Sedang',typeKey:'sdr'},
+  {type:'Repeater Ilegal',freq:'1800 MHz',loc:'Bandung',score:0.74,status:'Sedang',typeKey:'repeater'},
+  {type:'Jammer LTE',freq:'2.1 GHz',loc:'Pekanbaru',score:0.93,status:'Tinggi',typeKey:'jammer'},
+];
+
+const riskData = [
+  {p:4,d:4,label:'Monitoring\nkonvensional',R:16,priority:'Tinggi'},
+  {p:4,d:4,label:'Tata kelola\nsilo',R:16,priority:'Tinggi'},
+  {p:4,d:3,label:'Ledakan\ndata',R:12,priority:'Sedang'},
+  {p:5,d:5,label:'Perdagangan\nilegal APT',R:25,priority:'Kritis'},
+  {p:4,d:5,label:'Tidak ada\npredictive',R:20,priority:'Sangat Tinggi'},
+];
+
+function statusColor(s){
+  if(s==='Kritis') return 'var(--red2)';
+  if(s==='Tinggi') return 'var(--amber2)';
+  return 'var(--accent2)';
+}
+function statusBadgeClass(s){
+  if(s==='Kritis') return 'badge-red';
+  if(s==='Tinggi') return 'badge-amber';
+  return 'badge-blue';
+}
+
+function initDashboard() {
+  // Animate KPIs
+  animateCount('kpi1', 14287, 0, 1200, v => v.toLocaleString());
+  animateCount('kpi2', 7, 0, 800);
+  animateCount('kpi3', 92, 0, 1000, v => v + '%');
+  setTimeout(()=>{ document.getElementById('kpi4').textContent = '4.2'; }, 600);
+  animateCount('kpi5', 30, 0, 900, v => v + '%');
+  animateCount('kpi6', 22, 0, 1000, v => v + '%');
+
+  // Render table
+  const tbody = document.getElementById('aptTableBody');
+  tbody.innerHTML = aptData.map(d => `
+    <tr style="cursor:pointer" onclick="showAPTDetail(${JSON.stringify(d).replace(/"/g,'&quot;')})">
+      <td style="color:var(--text)">${d.type}</td>
+      <td style="font-family:var(--mono);color:var(--cyan2)">${d.freq}</td>
+      <td>${d.loc}</td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div style="height:5px;width:60px;background:var(--bg4);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${d.score*100}%;background:${d.score>0.9?'var(--red)':d.score>0.8?'var(--amber)':'var(--accent)'}"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">${(d.score*100).toFixed(0)}%</span>
+      </div></td>
+      <td><span class="badge ${statusBadgeClass(d.status)}">${d.status}</span></td>
+    </tr>
+  `).join('');
+
+  // Risk matrix
+  const rm = document.getElementById('riskMatrix');
+  const riskItems = [[6,'med'],[12,'med'],[15,'high'],[20,'high'],[25,'crit'],
+                     [4,'low'],[8,'med'],[10,'med'],[16,'high'],[20,'high'],
+                     [3,'low'],[6,'med'],[9,'med'],[12,'med'],[15,'high'],
+                     [2,'low'],[4,'low'],[6,'med'],[8,'med'],[10,'med'],
+                     [1,'low'],[2,'low'],[3,'low'],[4,'low'],[5,'low']];
+  rm.innerHTML = riskItems.map((item,i) => {
+    const rd = riskData.find(r => r.R === item[0]);
+    return `<div class="risk-cell r-${item[1]}" onclick="showRiskDetail(${item[0]},'${rd?rd.label:''}')">${item[0]}</div>`;
+  }).join('');
+
+  // Alerts
+  addInitialAlerts();
+
+  // Spectrum
+  initSpectrum();
+}
+
+function animateCount(id, target, start, dur, fmt = v => Math.round(v)) {
+  const el = document.getElementById(id);
+  const startTime = performance.now();
+  function step(now) {
+    const p = Math.min((now - startTime) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(start + (target - start) * ease);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function showAPTDetail(d) {
+  document.getElementById('modalTitle').textContent = '🔍 Detail: ' + d.type;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-item-label">Tipe APT</div><div class="detail-item-value" style="color:var(--red2)">${d.type}</div></div>
+      <div class="detail-item"><div class="detail-item-label">Frekuensi</div><div class="detail-item-value" style="font-family:var(--mono);color:var(--cyan2)">${d.freq}</div></div>
+      <div class="detail-item"><div class="detail-item-label">Lokasi Deteksi</div><div class="detail-item-value">${d.loc}</div></div>
+      <div class="detail-item"><div class="detail-item-label">AI Confidence</div><div class="detail-item-value" style="color:var(--green2)">${(d.score*100).toFixed(1)}%</div></div>
+      <div class="detail-item"><div class="detail-item-label">Status</div><div class="detail-item-value"><span class="badge ${statusBadgeClass(d.status)}">${d.status}</span></div></div>
+      <div class="detail-item"><div class="detail-item-label">Rekomendasi DSS</div><div class="detail-item-value" style="color:var(--amber2)">Tindakan Segera</div></div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--text2)">
+      🔗 <strong style="color:var(--accent2)">Blockchain Hash:</strong> <span style="font-family:var(--mono);font-size:10px">${generateHash()}</span>
+    </div>
+    <button class="btn btn-danger" style="width:100%;margin-top:12px" onclick="closeModal();showToast('🚨 Tindakan penertiban dikirim ke Balmon')">Kirim Perintah Penertiban</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function showRiskDetail(score, label) {
+  const rd = riskData.find(r => r.R === score);
+  document.getElementById('riskDetail').innerHTML = rd ? `
+    <div class="badge ${score===25?'badge-red':score>=20?'badge-amber':'badge-blue'}" style="margin-bottom:8px">Risk Score: ${score}</div>
+    <div style="font-size:12px;font-weight:600;margin-bottom:4px">${rd.label.replace('\n',' ')}</div>
+    <div style="font-size:11px;color:var(--text3)">P=${rd.p} × D=${rd.d} = <strong style="color:var(--text)">${rd.R}</strong></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:4px">Prioritas: <span style="color:${score===25?'var(--red2)':'var(--amber2)'}">${rd.priority}</span></div>
+  ` : `<div style="font-size:11px;color:var(--text3)">Sel kosong</div>`;
+}
+
+// ── SPECTRUM CANVAS ──
+let specRunning = true, specFrame;
+const specW=700,specH=160;
+let specData = new Array(specW).fill(0).map((_,i)=>-60+Math.random()*15);
+
+function initSpectrum() {
+  const c = document.getElementById('specCanvas');
+  if (!c) return;
+  c.width = specW; c.height = specH;
+  drawSpectrum(c);
+}
+
+function drawSpectrum(c) {
+  if (!specRunning) return;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,specW,specH);
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0,0,specW,specH);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(99,149,255,0.08)';
+  ctx.lineWidth = 1;
+  for(let i=0;i<5;i++){
+    ctx.beginPath(); ctx.moveTo(0,i*specH/4); ctx.lineTo(specW,i*specH/4); ctx.stroke();
+  }
+
+  // Update data
+  for(let i=0;i<specW;i++){
+    specData[i] += (Math.random()-0.5)*4;
+    specData[i] = Math.max(-90, Math.min(-20, specData[i]));
+  }
+  // Inject anomalies
+  const t = Date.now() / 1000;
+  const jPos = Math.floor(200 + Math.sin(t*0.3)*40);
+  for(let j=jPos-8;j<jPos+8;j++){ if(j>=0&&j<specW) specData[j] = -25 + Math.random()*8; }
+  const s2 = Math.floor(500 + Math.sin(t*0.2)*30);
+  for(let j=s2-5;j<s2+5;j++){ if(j>=0&&j<specW) specData[j] = -30 + Math.random()*6; }
+
+  // Draw spectrum
+  ctx.beginPath();
+  for(let i=0;i<specW;i++){
+    const y = specH - ((specData[i]+90)/70)*specH*0.9 - specH*0.05;
+    const normalised = (specData[i]+90)/70;
+    if(i===0) ctx.moveTo(i,y);
+    else ctx.lineTo(i,y);
+  }
+  ctx.strokeStyle = 'rgba(52,211,153,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Anomaly markers
+  const anom = [jPos, s2];
+  anom.forEach(ap => {
+    const ay = specH - ((specData[ap]+90)/70)*specH*0.9 - specH*0.05;
+    ctx.beginPath(); ctx.arc(ap, ay, 5, 0, Math.PI*2);
+    ctx.fillStyle = 'var(--red2)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(239,68,68,0.3)'; ctx.lineWidth=8;
+    ctx.beginPath(); ctx.arc(ap, ay, 10, 0, Math.PI*2); ctx.stroke();
+  });
+
+  specFrame = requestAnimationFrame(() => drawSpectrum(c));
+}
+
+function toggleSpectrum() {
+  specRunning = !specRunning;
+  const btn = document.querySelector('[onclick="toggleSpectrum()"]');
+  btn.textContent = specRunning ? 'Pause' : 'Resume';
+  if(specRunning) drawSpectrum(document.getElementById('specCanvas'));
+}
+
+// ── ALERTS ──
+const alertItems = [
+  {type:'crit',icon:'🚨',msg:'Jammer terdeteksi — 900 MHz',meta:'14:32:05 · Medan · CNN-LSTM: 96.2%'},
+  {type:'warn',icon:'⚠️',msg:'IMSI Catcher aktif di area publik',meta:'14:29:11 · Jakarta · CNN-LSTM: 89.1%'},
+  {type:'warn',icon:'⚠️',msg:'SDR Modified terdeteksi 2.4 GHz',meta:'14:25:44 · Surabaya · CNN-LSTM: 81.3%'},
+  {type:'info',icon:'ℹ️',msg:'Model Federated diperbarui — Round 12',meta:'14:20:00 · Server Pusat'},
+];
+
+function addInitialAlerts() {
+  const log = document.getElementById('alertLog');
+  log.innerHTML = alertItems.map(a => renderAlert(a)).join('');
+}
+
+function renderAlert(a) {
+  return `<div class="alert-item">
+    <div class="alert-icon ${a.type}">${a.icon}</div>
+    <div>
+      <div class="alert-body-text">${a.msg}</div>
+      <div class="alert-meta">${a.meta}</div>
+    </div>
+  </div>`;
+}
+
+function addAlert() {
+  const newAlerts = [
+    {type:'crit',icon:'🚨',msg:'Repeater Ilegal baru — 1800 MHz',meta:new Date().toLocaleTimeString() + ' · Pekanbaru · AI: 91.4%'},
+    {type:'warn',icon:'⚠️',msg:'Sinyal anomali di band 2.1 GHz',meta:new Date().toLocaleTimeString() + ' · Bandung · AI: 78.9%'},
+    {type:'info',icon:'ℹ️',msg:'Blockchain block #0043 ditambahkan',meta:new Date().toLocaleTimeString() + ' · Balmon Medan'},
+  ];
+  const r = newAlerts[Math.floor(Math.random()*newAlerts.length)];
+  const log = document.getElementById('alertLog');
+  log.insertAdjacentHTML('afterbegin', renderAlert(r));
+  const count = parseInt(document.getElementById('alertBadge').textContent);
+  if(!isNaN(count)) document.getElementById('alertBadge').textContent = '⚠ ' + (count+1) + ' Alert Aktif';
+}
+
+function filterTable(q) {
+  const rows = document.querySelectorAll('#aptTableBody tr');
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+
+// ══════════════════════════════════════
+//  DETEKSI PAGE
+// ══════════════════════════════════════
+let perfChartInst;
+function initDeteksiPage() {
+  renderArchViz();
+  initClassifyGrid();
+  if(!perfChartInst) initPerfChart();
+  drawSpectro();
+}
+
+function renderArchViz() {
+  const layers = [
+    {name:'Input',sub:'128×128×3 STFT',color:'var(--bg4)',border:'var(--border2)'},
+    {name:'Conv Block 1–4',sub:'32→256 filters',color:'rgba(59,130,246,0.1)',border:'rgba(59,130,246,0.4)'},
+    {name:'Flatten',sub:'65,536 units',color:'var(--bg4)',border:'var(--border2)'},
+    {name:'BiLSTM 1',sub:'256 units',color:'rgba(139,92,246,0.1)',border:'rgba(139,92,246,0.4)'},
+    {name:'BiLSTM 2',sub:'256 units',color:'rgba(139,92,246,0.1)',border:'rgba(139,92,246,0.4)'},
+    {name:'Output',sub:'5-class Softmax',color:'rgba(16,185,129,0.1)',border:'rgba(16,185,129,0.4)'},
+  ];
+  document.getElementById('archViz').innerHTML = layers.map((l,i) => `
+    <div style="display:flex;align-items:center;gap:4px">
+      <div style="background:${l.color};border:1px solid ${l.border};border-radius:8px;padding:10px 12px;text-align:center;min-width:100px;cursor:default">
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${l.name}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${l.sub}</div>
+      </div>
+      ${i<layers.length-1 ? '<span style="color:var(--accent2);font-size:18px;flex-shrink:0">→</span>' : ''}
+    </div>
+  `).join('');
+}
+
+const classLabels = ['Normal','Jammer','Repeater Ilegal','IMSI Catcher','SDR Modified'];
+const classColors = ['var(--green)','var(--red)','var(--amber)','var(--purple)','var(--cyan)'];
+let classValues = [0,0,0,0,0];
+
+function initClassifyGrid() {
+  const g = document.getElementById('classifyGrid');
+  g.innerHTML = classLabels.map((l,i) => `
+    <div class="class-row">
+      <div class="class-name">${l}</div>
+      <div class="class-bar-wrap"><div class="class-bar" id="cbar${i}" style="width:0%;background:${classColors[i]}"></div></div>
+      <div class="class-pct" id="cpct${i}" style="color:${classColors[i]}">0%</div>
+    </div>
+  `).join('');
+}
+
+function runInference() {
+  drawSpectro(true);
+  // Random anomaly injection
+  const anom = Math.floor(Math.random()*4) + 1;
+  const vals = new Array(5).fill(0).map((_,i) => i===anom ? 0.7+Math.random()*0.25 : Math.random()*0.15);
+  const sum = vals.reduce((a,b)=>a+b,0);
+  classValues = vals.map(v => v/sum);
+  classValues.forEach((v,i) => {
+    document.getElementById('cbar'+i).style.width = (v*100).toFixed(1) + '%';
+    document.getElementById('cpct'+i).textContent = (v*100).toFixed(1) + '%';
+  });
+  showToast('🧠 Inferensi selesai — ' + classLabels[anom] + ' terdeteksi!');
+}
+
+function drawSpectro(animate=false) {
+  const c = document.getElementById('spectroCanvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  for(let y=0;y<c.height;y++) {
+    for(let x=0;x<c.width;x++) {
+      const v = Math.random();
+      const r = Math.floor(v * 60);
+      const g = Math.floor(v * 160 * (animate ? 1.2 : 1));
+      const b = Math.floor(v * 40);
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(x,y,1,1);
+    }
+  }
+  if(animate) {
+    // Anomaly stripe
+    ctx.fillStyle = 'rgba(239,68,68,0.5)';
+    ctx.fillRect(60,20,20,c.height-40);
+  }
+}
+
+function initPerfChart() {
+  const ctx = document.getElementById('perfChart');
+  if(!ctx) return;
+  perfChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Threshold','SVM','Random Forest','CNN Only','CNN-LSTM\n(AIREC-APT)'],
+      datasets: [{
+        label: 'Akurasi (%)',
+        data: [67.5, 80, 82.5, 89.5, 92],
+        backgroundColor: ['#374151','#374151','#374151','#374151','#3b82f6'],
+        borderRadius: 4,
+        borderWidth: 0,
+      },{
+        label: 'False Alarm Rate (%)',
+        data: [20, 12.5, 10, 6.5, 4],
+        backgroundColor: ['rgba(239,68,68,0.2)','rgba(239,68,68,0.2)','rgba(239,68,68,0.2)','rgba(239,68,68,0.2)','rgba(239,68,68,0.5)'],
+        borderRadius: 4,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(99,149,255,0.08)' }, ticks: { color: '#64748b', font: {size:10} } },
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: {size:9} } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════
+//  MAP PAGE
+// ══════════════════════════════════════
+let mapFrame, mapFilter = 'all';
+const hotspots = [
+  {x:0.2,y:0.3,type:'jammer',size:8,label:'Medan'},
+  {x:0.55,y:0.55,type:'imsi',size:7,label:'Jakarta'},
+  {x:0.65,y:0.65,type:'sdr',size:6,label:'Bandung'},
+  {x:0.72,y:0.58,type:'repeater',size:9,label:'Surabaya'},
+  {x:0.25,y:0.42,type:'jammer',size:5,label:'Pekanbaru'},
+  {x:0.45,y:0.45,type:'sdr',size:5,label:'Palembang'},
+  {x:0.38,y:0.7,type:'repeater',size:7,label:'Pontianak'},
+  {x:0.8,y:0.5,type:'jammer',size:6,label:'Makassar'},
+  {x:0.88,y:0.45,type:'imsi',size:5,label:'Manado'},
+];
+const typeColors = {jammer:'#ef4444',imsi:'#f59e0b',sdr:'#8b5cf6',repeater:'#3b82f6'};
+
+function initMapPage() {
+  const c = document.getElementById('mapCanvas');
+  if(!c) return;
+  c.width = c.parentElement.offsetWidth || 600;
+  c.height = 220;
+  drawMap(c);
+}
+
+function drawMap(c) {
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0,0,W,H);
+  // Simple Indonesia outline (simplified polygons)
+  ctx.strokeStyle = 'rgba(99,149,255,0.2)';
+  ctx.lineWidth = 1;
+  // Sumatera
+  ctx.beginPath(); ctx.roundRect(W*0.05,H*0.15,W*0.25,H*0.6,4); ctx.stroke();
+  // Java
+  ctx.beginPath(); ctx.roundRect(W*0.42,H*0.45,W*0.32,H*0.2,4); ctx.stroke();
+  // Kalimantan
+  ctx.beginPath(); ctx.roundRect(W*0.34,H*0.2,W*0.22,H*0.45,4); ctx.stroke();
+  // Sulawesi
+  ctx.beginPath(); ctx.roundRect(W*0.68,H*0.2,W*0.1,H*0.5,4); ctx.stroke();
+  // Papua
+  ctx.beginPath(); ctx.roundRect(W*0.82,H*0.2,W*0.16,H*0.5,4); ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = 'rgba(99,149,255,0.3)';
+  ctx.font = '9px monospace';
+  ctx.fillText('Sumatera',W*0.08,H*0.55);
+  ctx.fillText('Kalimantan',W*0.36,H*0.46);
+  ctx.fillText('Jawa',W*0.5,H*0.62);
+  ctx.fillText('Sulawesi',W*0.7,H*0.52);
+  ctx.fillText('Papua',W*0.86,H*0.52);
+
+  const t = Date.now()/1000;
+  hotspots.filter(h => mapFilter==='all' || h.type===mapFilter).forEach(h => {
+    const x = h.x * W, y = h.y * H;
+    const col = typeColors[h.type];
+    const pulse = Math.sin(t*2 + h.x*5) * 0.3 + 0.7;
+    // Glow
+    ctx.beginPath(); ctx.arc(x,y,h.size+6,0,Math.PI*2);
+    ctx.fillStyle = col.replace(')',`,${pulse*0.15})`).replace('rgb','rgba'); ctx.fill();
+    // Dot
+    ctx.beginPath(); ctx.arc(x,y,h.size,0,Math.PI*2);
+    ctx.fillStyle = col; ctx.fill();
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '9px monospace';
+    ctx.fillText(h.label, x+h.size+3, y+3);
+  });
+
+  cancelAnimationFrame(mapFrame);
+  mapFrame = requestAnimationFrame(() => drawMap(c));
+}
+
+function filterMap(f) {
+  mapFilter = f;
+}
+
+// ══════════════════════════════════════
+//  FEDERATED ML
+// ══════════════════════════════════════
+const balmonNodes = [
+  {name:'Balmon Medan',loc:'Sumut',prog:0,status:'idle'},
+  {name:'Balmon Pekanbaru',loc:'Riau',prog:0,status:'idle'},
+  {name:'Balmon Palangkaraya',loc:'Kalteng',prog:0,status:'idle'},
+  {name:'Balmon Jakarta',loc:'DKI',prog:0,status:'idle'},
+  {name:'Balmon Surabaya',loc:'Jatim',prog:0,status:'idle'},
+  {name:'Balmon Makassar',loc:'Sulsel',prog:0,status:'idle'},
+  {name:'Balmon Denpasar',loc:'Bali',prog:0,status:'idle'},
+  {name:'Balmon Manado',loc:'Sulut',prog:0,status:'idle'},
+];
+let fedRound = 0, fedChartInst;
+
+function initFederatedPage() {
+  renderFedGrid();
+  if(!fedChartInst) initFedChart();
+}
+
+function renderFedGrid() {
+  document.getElementById('fedGrid').innerHTML = balmonNodes.map((n,i) => `
+    <div class="fed-node ${n.status==='syncing'?'syncing':''}" onclick="toggleFedNode(${i})">
+      <div class="fed-node-icon">🏢</div>
+      <div class="fed-node-name">${n.name}</div>
+      <div class="fed-node-sub">${n.loc}</div>
+      <div class="fed-progress"><div class="fed-progress-bar" id="fedprog${i}" style="width:${n.prog}%"></div></div>
+    </div>
+  `).join('');
+}
+
+function toggleFedNode(i) {
+  balmonNodes[i].status = balmonNodes[i].status === 'idle' ? 'syncing' : 'idle';
+  renderFedGrid();
+}
+
+function startFedRound() {
+  fedRound++;
+  document.getElementById('fedRound').textContent = fedRound;
+  balmonNodes.forEach((n,i) => { n.status = 'syncing'; n.prog = 0; });
+  renderFedGrid();
+  let step = 0;
+  const iv = setInterval(() => {
+    step += 10;
+    balmonNodes.forEach((n,i) => {
+      n.prog = Math.min(step + Math.random()*15, 100);
+      const el = document.getElementById('fedprog'+i);
+      if(el) el.style.width = n.prog + '%';
+    });
+    document.getElementById('globalAgg').style.width = step + '%';
+    if(step >= 100) {
+      clearInterval(iv);
+      balmonNodes.forEach(n => { n.status = 'idle'; n.prog = 100; });
+      renderFedGrid();
+      const acc = (80 + fedRound * 1.5 + Math.random()*2).toFixed(1);
+      document.getElementById('fedAccLabel').textContent = 'Akurasi: ' + Math.min(acc,94) + '%';
+      addFedDataPoint(fedRound, parseFloat(Math.min(acc,94)));
+      showToast('✅ Federated Round ' + fedRound + ' selesai — Model diperbarui');
+    }
+  }, 150);
+}
+
+const fedHistory = {rounds:[],accuracy:[],loss:[]};
+
+function addFedDataPoint(r, acc) {
+  fedHistory.rounds.push('R'+r);
+  fedHistory.accuracy.push(acc);
+  fedHistory.loss.push((1 - acc/100).toFixed(3));
+  if(fedChartInst) {
+    fedChartInst.data.labels = fedHistory.rounds;
+    fedChartInst.data.datasets[0].data = fedHistory.accuracy;
+    fedChartInst.update();
+  }
+}
+
+function initFedChart() {
+  const ctx = document.getElementById('fedChart');
+  if(!ctx) return;
+  fedHistory.rounds = ['R0','R1','R2','R3','R4'];
+  fedHistory.accuracy = [72,78,82,86,88.5];
+  fedChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: fedHistory.rounds,
+      datasets: [{
+        label: 'Global Model Accuracy',
+        data: fedHistory.accuracy,
+        borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)',
+        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#3b82f6'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 60, max: 100, grid: { color:'rgba(99,149,255,0.08)' }, ticks:{color:'#64748b',font:{size:10}} },
+        x: { grid: { display:false }, ticks:{color:'#64748b',font:{size:10}} }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════
+//  DIGITAL TWIN
+// ══════════════════════════════════════
+let twinChartInst, twinScenarioType = 'normal';
+function initTwinPage() {
+  drawTwinBase();
+  updateTwinParams();
+}
+
+function twinScenario(type) {
+  twinScenarioType = type;
+  const msgs = {
+    normal: '✅ Skenario Normal — Spektrum bersih, tidak ada interferensi terdeteksi.',
+    jam: '🚨 JAMMER AKTIF — Interferensi terdeteksi pada 900 MHz. Coverage selular terganggu 78%.',
+    imsi: '⚠️ IMSI CATCHER AKTIF — Penyadapan sinyal handset pada area 500m radius.'
+  };
+  document.getElementById('twinStatus').textContent = msgs[type];
+  drawTwinBase(type);
+}
+
+function drawTwinBase(scenario='normal') {
+  const c = document.getElementById('twinCanvas');
+  if(!c) return;
+  c.width = c.parentElement.offsetWidth || 500;
+  c.height = 200;
+  const ctx = c.getContext('2d');
+  const W=c.width, H=c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#111827'; ctx.fillRect(0,0,W,H);
+
+  // Draw spectrum bars
+  for(let i=0;i<60;i++){
+    const x=W*0.05+i*(W*0.9/60);
+    let h = 20 + Math.random()*40;
+    let col = '#1d9e75';
+    if(scenario==='jam' && i>20&&i<30){ h = 120+Math.random()*40; col='#ef4444'; }
+    if(scenario==='imsi' && i>35&&i<42){ h = 80+Math.random()*30; col='#f59e0b'; }
+    ctx.fillStyle = col + '80';
+    ctx.fillRect(x, H-h-20, W*0.9/60-2, h);
+    ctx.fillStyle = col;
+    ctx.fillRect(x, H-h-20, W*0.9/60-2, 2);
+  }
+  // Labels
+  ctx.fillStyle = '#64748b'; ctx.font = '10px monospace';
+  ctx.fillText('400 MHz', W*0.04, H-6);
+  ctx.fillText('900 MHz', W*0.5, H-6);
+  ctx.fillText('2.6 GHz', W*0.92, H-6);
+}
+
+function updateTwinParams() {
+  const devCount = parseInt(document.getElementById('devCountLabel').textContent)||0;
+  const freq = parseInt(document.getElementById('freqLabel').textContent)||900;
+  const pred = devCount===0 ? '✅ Tidak ada dampak terdeteksi' :
+    devCount<5 ? `⚠️ Gangguan ringan di ${freq} MHz` :
+    `🚨 Gangguan serius — ${devCount} perangkat aktif, ${Math.min(devCount*8,95)}% coverage terdampak`;
+  document.getElementById('twinPrediction').textContent = pred;
+}
+
+function runTwinSim() {
+  showToast('🔬 Simulasi Digital Twin dijalankan...');
+  setTimeout(()=>{ twinScenario('jam'); }, 800);
+}
+
+// ══════════════════════════════════════
+//  DSS
+// ══════════════════════════════════════
+const topsisData = [
+  {action:'Penertiban Langsung ke Lapangan',scores:[4,5,3],ci:null},
+  {action:'Blokir Frekuensi via Operator',scores:[5,3,5],ci:null},
+  {action:'Koordinasi Lintas Instansi',scores:[3,4,4],ci:null},
+  {action:'Surat Peringatan Administratif',scores:[2,2,3],ci:null},
+];
+const weights=[0.540,0.297,0.163];
+
+function initDSSPage() {
+  recalcTOPSIS();
+  initGapAnalysis();
+}
+
+function recalcTOPSIS() {
+  // Normalize & weight
+  const n = topsisData.length, m = 3;
+  const norm = topsisData.map(r => r.scores.map((s,j) => {
+    const denom = Math.sqrt(topsisData.reduce((sum,row) => sum+row.scores[j]**2, 0));
+    return (s/denom)*weights[j];
+  }));
+  // Ideal solutions
+  const idealPos = [0,1,2].map(j => Math.max(...norm.map(r=>r[j])));
+  const idealNeg = [0,1,2].map(j => Math.min(...norm.map(r=>r[j])));
+  // Distances & C*
+  const results = topsisData.map((r,i) => {
+    const dp = Math.sqrt(norm[i].reduce((s,v,j)=>(s+(v-idealPos[j])**2),0));
+    const dn = Math.sqrt(norm[i].reduce((s,v,j)=>(s+(v-idealNeg[j])**2),0));
+    return { action: r.action, ci: dn/(dp+dn) };
+  }).sort((a,b)=>b.ci-a.ci);
+  topsisData.forEach((r,i)=>r.ci=results.find(res=>res.action===r.action)?.ci);
+
+  document.getElementById('topsisResult').innerHTML = results.map((r,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:8px;${i===0?'border:1px solid rgba(59,130,246,0.3)':'border:1px solid transparent'}">
+      <div style="width:24px;height:24px;border-radius:6px;background:${i===0?'var(--accent)':i===1?'rgba(59,130,246,0.15)':'var(--bg4)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${i===0?'#fff':'var(--text3)'};flex-shrink:0">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${r.action}</div>
+        <div style="height:5px;background:var(--bg4);border-radius:3px;margin-top:5px">
+          <div style="height:100%;width:${(r.ci*100).toFixed(1)}%;background:${i===0?'var(--accent)':'var(--text3)'};border-radius:3px"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${i===0?'var(--accent2)':'var(--text2)'}">C*=${r.ci.toFixed(3)}</div>
+      ${i===0 ? '<span class="badge badge-blue">Prioritas</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function initGapAnalysis() {
+  const gaps = [
+    {dim:'Deteksi APT real-time',ideal:'≤60 detik',actual:'≥24 jam',gap:98.6,w:0.25},
+    {dim:'Integrasi data lintas instansi',ideal:'Platform terpadu',actual:'Silo per satker',gap:85.0,w:0.20},
+    {dim:'Regulasi APT dual-use',ideal:'Regulasi eksplisit',actual:'Tidak ada aturan',gap:100,w:0.20},
+    {dim:'Predictive enforcement',ideal:'Preventif berbasis AI',actual:'Reaktif pasca-pelanggaran',gap:100,w:0.20},
+    {dim:'Audit trail terverifikasi',ideal:'Immutable blockchain',actual:'Dokumen manual',gap:90.0,w:0.15},
+  ];
+  document.getElementById('gapAnalysis').innerHTML = gaps.map(g => `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px;background:var(--bg3);border-radius:8px">
+      <div style="width:180px;font-size:12px;color:var(--text);flex-shrink:0">${g.dim}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">
+          <span>Aktual: ${g.actual}</span><span>Ideal: ${g.ideal}</span>
+        </div>
+        <div style="height:8px;background:var(--bg4);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${g.gap}%;background:${g.gap===100?'var(--red)':g.gap>90?'var(--amber)':'var(--accent)'};border-radius:4px;transition:width 0.8s"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${g.gap===100?'var(--red2)':g.gap>90?'var(--amber2)':'var(--accent2)'};min-width:50px;text-align:right">${g.gap}%</div>
+      <div style="font-size:10px;color:var(--text3);min-width:30px">w=${g.w}</div>
+    </div>
+  `).join('') + `
+    <div style="display:flex;justify-content:flex-end;padding:8px 0;font-size:13px;font-weight:700;color:var(--red2)">
+      Weighted Gap Total: ~95% — Justifikasi AIREC-APT Framework
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════
+//  BLOCKCHAIN
+// ══════════════════════════════════════
+let blockCount = 5;
+const blocks = [
+  {num:'#0001',hash:'a3f2b1c4d5e6',tx:'Inisialisasi Ledger',time:'00:00:01'},
+  {num:'#0002',hash:'b7e9c2a1f3d4',tx:'Deteksi Jammer — Medan',time:'14:25:03'},
+  {num:'#0003',hash:'c4d8e1b2a7f9',tx:'Penertiban dieksekusi',time:'14:27:15'},
+  {num:'#0004',hash:'d2f6a9b3c1e8',tx:'Model FL diperbarui',time:'14:29:44'},
+  {num:'#0005',hash:'e1c7d4b8a2f3',tx:'IMSI Catcher — Jakarta',time:'14:32:01'},
+];
+
+function initBlockchainPage() {
+  renderChain();
+}
+
+function renderChain() {
+  document.getElementById('chainWrap').innerHTML = blocks.map((b,i) => `
+    ${i>0 ? '<span class="chain-arrow">→</span>' : ''}
+    <div class="block ${i===blocks.length-1?'latest':''}" onclick="highlightBlock(this,'${b.hash}')">
+      <div class="block-num">Block ${b.num}</div>
+      <div class="block-hash">${b.hash}…</div>
+      <div class="block-tx" style="color:var(--text2);font-size:9px;margin-bottom:2px">${b.tx}</div>
+      <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">${b.time}</div>
+    </div>
+  `).join('');
+  document.getElementById('blockCount').textContent = blocks.length;
+  document.getElementById('txCount').textContent = blocks.length * 4 + 4;
+}
+
+function addBlock() {
+  const newHash = generateHash().substring(0,12);
+  const newNum = '#' + String(blocks.length+1).padStart(4,'0');
+  const txTypes = ['Deteksi SDR Modified','Koordinasi Kemenko','Update Model AI','Sertifikasi Perangkat'];
+  blocks.push({num:newNum, hash:newHash, tx:txTypes[Math.floor(Math.random()*txTypes.length)], time:new Date().toLocaleTimeString()});
+  renderChain();
+  showToast('🔗 Block ' + newNum + ' berhasil ditambahkan ke ledger');
+}
+
+function highlightBlock(el, hash) {
+  document.getElementById('verifyInput').value = 'Block ' + el.querySelector('.block-num').textContent.replace('Block ','');
+  document.getElementById('verifyResult').innerHTML = `
+    <div style="color:var(--green2);margin-bottom:8px">✓ Hash Valid — Integritas Terkonfirmasi</div>
+    <div style="color:var(--text3)">SHA-256: ${hash}${generateHash().substring(0,40)}</div>
+    <div style="color:var(--text3);margin-top:4px">Validator PoA: Balmon Medan, Jakarta, Surabaya</div>
+  `;
+}
+
+function verifyBlock() {
+  const v = document.getElementById('verifyInput').value;
+  const el = document.getElementById('verifyResult');
+  if(v.trim()) {
+    el.innerHTML = `<div style="color:var(--green2);margin-bottom:8px">✓ Hash Valid</div><div style="color:var(--text3);font-size:10px">SHA-256: ${generateHash()}</div><div style="color:var(--text3);margin-top:4px">Block terverifikasi oleh 3/3 validator PoA</div>`;
+  } else {
+    el.innerHTML = '<div style="color:var(--red2)">✗ Block ID tidak valid</div>';
+  }
+}
+
+// ══════════════════════════════════════
+//  ROADMAP
+// ══════════════════════════════════════
+let budgetChartInst;
+function initRoadmapPage() {
+  renderRoadmap();
+  renderGantt();
+  if(!budgetChartInst) initBudgetChart();
+}
+
+function renderRoadmap() {
+  const phases = [
+    {num:1,title:'Fase 1 — Pilot (Bln 1-12)',desc:'Deployment 3 Balmon: Medan, Pekanbaru, Palangkaraya. Development CNN-LSTM & integrasi awal.',kpis:['Akurasi ≥80%','MTTD ≤5 min','Coverage 30%','Uptime ≥95%'],prog:65,cls:'phase1',color:'var(--accent)'},
+    {num:2,title:'Fase 2 — Scaled (Bln 13-24)',desc:'Deployment 6+ Balmon tambahan. Aktivasi Federated Learning & Blockchain PoA.',kpis:['Akurasi ≥88%','MTTD ≤2 min','Coverage 60%','Auto-Decision 50%'],prog:20,cls:'phase2',color:'var(--purple)'},
+    {num:3,title:'Fase 3 — Nasional (Bln 25-48)',desc:'Rollout nasional 34 Balmon. Optimasi model AI & transfer best practices ke ASEAN.',kpis:['Akurasi ≥92%','MTTD ≤60 det','Coverage 100%','Auto-Decision ≥70%'],prog:0,cls:'phase3',color:'var(--green)'},
+  ];
+  document.getElementById('roadmapCards').innerHTML = phases.map(p => `
+    <div class="phase active-phase" onclick="showPhaseDetail(${p.num})">
+      <div class="phase-num ${p.cls}">${p.num}</div>
+      <div class="phase-content">
+        <div class="phase-title">${p.title}</div>
+        <div class="phase-desc">${p.desc}</div>
+        <div class="phase-kpis">${p.kpis.map(k=>`<span class="phase-kpi">${k}</span>`).join('')}</div>
+        <div class="phase-progress">
+          <div class="phase-progress-fill" style="width:${p.prog}%;background:${p.color}"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px">Progress: ${p.prog}%</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showPhaseDetail(n) {
+  showToast('📋 Fase ' + n + ' — detail tersedia di halaman DSS & KPI');
+}
+
+function renderGantt() {
+  const activities = [
+    {label:'Regulatory Gap Analysis',start:0,dur:25,color:'#3b82f6'},
+    {label:'Data Integration Platform',start:15,dur:30,color:'#8b5cf6'},
+    {label:'ML Model Development',start:15,dur:45,color:'#ef4444'},
+    {label:'Pilot Deployment',start:50,dur:35,color:'#f59e0b'},
+    {label:'DSS + Blockchain',start:55,dur:30,color:'#06b6d4'},
+    {label:'Scaled Deployment',start:65,dur:25,color:'#10b981'},
+    {label:'Capacity Building',start:0,dur:100,color:'#64748b'},
+  ];
+  document.getElementById('ganttChart').innerHTML = activities.map(a => `
+    <div class="gantt-row">
+      <div class="gantt-label">${a.label}</div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:${a.start}%;width:${a.dur}%;background:${a.color}20;border:1px solid ${a.color}60;color:${a.color}">
+          ${a.label.split(' ')[0]}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function initBudgetChart() {
+  const ctx = document.getElementById('budgetChart');
+  if(!ctx) return;
+  budgetChartInst = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['ML & Integrasi','System Integration','Infrastruktur Cloud','Edge & Sensor','Capacity Building'],
+      datasets:[
+        {label:'Fase 1',data:[1000,500,800,650,250],backgroundColor:'rgba(59,130,246,0.6)',borderRadius:3,borderWidth:0},
+        {label:'Fase 2',data:[500,350,650,1000,350],backgroundColor:'rgba(139,92,246,0.6)',borderRadius:3,borderWidth:0},
+        {label:'Fase 3',data:[250,225,500,1250,250],backgroundColor:'rgba(16,185,129,0.6)',borderRadius:3,borderWidth:0},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{size:10},boxWidth:10,padding:12}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#64748b',font:{size:9}}},
+        y:{grid:{color:'rgba(99,149,255,0.08)'},ticks:{color:'#64748b',font:{size:10},callback:(v)=>'Rp '+v}},
+        stacked:false
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════
+function generateHash() {
+  return Array.from({length:64},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+}
+
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.className = 'notification-toast';
+  el.innerHTML = `<div style="font-weight:500;color:var(--text);margin-bottom:3px">${msg}</div><div style="font-size:10px;color:var(--text3)">${new Date().toLocaleTimeString()}</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(-10px)'; el.style.transition='all 0.3s'; setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function simulateDeteksi() {
+  showPage('deteksi');
+  setTimeout(runInference, 500);
+  addAlert();
+}
+
+// ══════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initDashboard();
+});
+</script>
+</body>
+</html>
